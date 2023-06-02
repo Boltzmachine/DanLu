@@ -1,5 +1,5 @@
 use ratatui::widgets::ListState;
-use crate::utils::task::Task;
+use crate::jobs::task::Task;
 
 pub struct StatefulList<T> {
     pub state: ListState,

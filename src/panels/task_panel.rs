@@ -1,4 +1,5 @@
-use crate::utils::task::*;
+use crate::utils::KeyInputRespond;
+use crate::jobs::task::{Task, TaskStatus};
 use super::Panel;
 
 use ratatui::{
@@ -77,7 +78,7 @@ impl TaskPanel {
 }
 
 impl<B: Backend> Panel<B> for TaskPanel {
-    fn draw(&mut self, f: &mut Frame<B>, chunk: Rect) {
+    fn draw(&mut self, f: &mut Frame<B>, area: Rect, is_active: bool) {
         let items: Vec<ListItem> = self
         .tasks
         .items
@@ -100,20 +101,23 @@ impl<B: Backend> Panel<B> for TaskPanel {
             ])
         })
         .collect();
-
+    
     let items = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title("Tasks"))
+        .block(Block::default()
+            .borders(Borders::ALL)
+            .title("Tasks")
+            .border_style(Style::default().fg(if is_active { Color::Green } else { Color::White })))
         .highlight_style(
             Style::default()
                 .add_modifier(Modifier::BOLD),
         )
         .highlight_symbol(">> ");
 
-    f.render_stateful_widget(items, chunk, &mut self.tasks.state);
+    f.render_stateful_widget(items, area, &mut self.tasks.state);
 
     }
 
-    fn handle_input(&mut self, key: KeyEvent) {
+    fn handle_input(&mut self, key: KeyEvent) -> Option<KeyInputRespond> {
         match key.code {
             KeyCode::Down => {
                 self.tasks.next();
@@ -121,7 +125,11 @@ impl<B: Backend> Panel<B> for TaskPanel {
             KeyCode::Up => {
                 self.tasks.previous();
             }
+            KeyCode::Enter | KeyCode::Right => {
+                return Some(KeyInputRespond::Activate(super::PanelType::Log));
+            }
             _ => {}
         }
+        None
     }
 }

@@ -2,6 +2,7 @@ use chrono::prelude::*;
 use strum_macros::AsRefStr;
 use rand::Rng;
 use lipsum::lipsum;
+use std::rc::Rc;
 
 #[derive(AsRefStr)]
 pub enum TaskStatus {
@@ -18,7 +19,7 @@ pub struct Task {
     pub create_time: DateTime<Utc>,
     pub start_time: Option<DateTime<Utc>>,
     pub end_time: Option<DateTime<Utc>>,
-    pub log: String,
+    pub log: Rc<String>,
 }
 
 impl Task {
@@ -28,7 +29,7 @@ impl Task {
             create_time: Utc::now(),
             start_time: None,
             end_time: None,
-            log: String::new(),
+            log: Rc::new("".into()),
         }
     }
 
@@ -42,7 +43,7 @@ impl Task {
             4 => TaskStatus::Killed,
             _ => TaskStatus::KeyboardInterrupt,
         };
-        task.log = String::from(lipsum(rand::random::<usize>() % 1000));
+        task.log = Rc::new(lipsum(rand::random::<usize>() % 1000));
         task
     }
 }
