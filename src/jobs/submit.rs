@@ -1,11 +1,12 @@
-fn submit(command: &str) {
-    println!("Submitting command: {}", command);
-    
+use super::job_queue::JobQueue;
+
+fn submit(queue: &JobQueue, command: &str) {
+    queue.push_back(command);
 }
 
 
-pub fn batch_submit(commands: Vec<String>) {
+pub fn batch_submit(queue: &JobQueue, commands: Vec<&str>) {
     for command in commands {
-        submit(command);
+        submit(queue, command);
     }
 }
