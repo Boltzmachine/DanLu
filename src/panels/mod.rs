@@ -1,10 +1,10 @@
-pub mod task_panel;
-pub mod log_panel;
 pub mod run_panel;
+pub mod log_panel;
+pub mod chart_panel;
 
-pub use task_panel::TaskPanel;
-pub use log_panel::LogPanel;
 pub use run_panel::RunPanel;
+pub use log_panel::LogPanel;
+pub use chart_panel::ChartPanel;
 
 use crate::utils::KeyInputRespond;
 
@@ -13,9 +13,8 @@ use crossterm::event::{DisableMouseCapture, EnableMouseCapture, Event, KeyCode, 
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum PanelType {
-    Task,
-    Log,
     Run,
+    Log,
 }
 
 pub trait Panel<B: Backend> {

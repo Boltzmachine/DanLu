@@ -1,5 +1,5 @@
 use crate::utils::KeyInputRespond;
-use crate::jobs::task::{Task, TaskStatus};
+use crate::jobs::run::{Run, RunStatus};
 use super::Panel;
 
 use ratatui::{
@@ -58,41 +58,41 @@ impl<T> StatefulList<T> {
 }
 
 
-pub struct TaskPanel {
-    pub tasks: StatefulList<Task>,
+pub struct RunPanel {
+    pub runs: StatefulList<Run>,
 }
 
-impl TaskPanel {
-    pub fn new() -> TaskPanel {
-        TaskPanel {
-            tasks: StatefulList::with_items(vec![
-                Task::random(),
-                Task::random(),
-                Task::random(),
-                Task::random(),
-                Task::random(),
-                Task::random(),
+impl RunPanel {
+    pub fn new() -> RunPanel {
+        RunPanel {
+            runs: StatefulList::with_items(vec![
+                Run::random(),
+                Run::random(),
+                Run::random(),
+                Run::random(),
+                Run::random(),
+                Run::random(),
             ]),
         }
     }
 }
 
-impl<B: Backend> Panel<B> for TaskPanel {
+impl<B: Backend> Panel<B> for RunPanel {
     fn draw(&mut self, f: &mut Frame<B>, area: Rect, is_active: bool) {
         let items: Vec<ListItem> = self
-        .tasks
+        .runs
         .items
         .iter()
-        .map(|task| {
+        .map(|run| {
             let status = Line::from(Span::styled(
-                task.status.as_ref(),
-                match task.status {
-                    TaskStatus::Running => Style::default().fg(Color::Green),
-                    TaskStatus::Pending => Style::default().fg(Color::Yellow),
-                    TaskStatus::Finished => Style::default().fg(Color::White),
-                    TaskStatus::Crashed => Style::default().fg(Color::Red),
-                    TaskStatus::Killed => Style::default().fg(Color::Magenta),
-                    TaskStatus::KeyboardInterrupt => Style::default().fg(Color::Cyan),
+                run.status.as_ref(),
+                match run.status {
+                    RunStatus::Running => Style::default().fg(Color::Green),
+                    RunStatus::Pending => Style::default().fg(Color::Yellow),
+                    RunStatus::Finished => Style::default().fg(Color::White),
+                    RunStatus::Crashed => Style::default().fg(Color::Red),
+                    RunStatus::Killed => Style::default().fg(Color::Magenta),
+                    RunStatus::KeyboardInterrupt => Style::default().fg(Color::Cyan),
                 }
             ));
 
@@ -105,7 +105,7 @@ impl<B: Backend> Panel<B> for TaskPanel {
     let items = List::new(items)
         .block(Block::default()
             .borders(Borders::ALL)
-            .title("Tasks")
+            .title("Runs")
             .border_style(Style::default().fg(if is_active { Color::Green } else { Color::White })))
         .highlight_style(
             Style::default()
@@ -113,17 +113,17 @@ impl<B: Backend> Panel<B> for TaskPanel {
         )
         .highlight_symbol(">> ");
 
-    f.render_stateful_widget(items, area, &mut self.tasks.state);
+    f.render_stateful_widget(items, area, &mut self.runs.state);
 
     }
 
     fn handle_input(&mut self, key: KeyEvent) -> Option<KeyInputRespond> {
         match key.code {
             KeyCode::Down => {
-                self.tasks.next();
+                self.runs.next();
             }
             KeyCode::Up => {
-                self.tasks.previous();
+                self.runs.previous();
             }
             KeyCode::Enter | KeyCode::Right => {
                 return Some(KeyInputRespond::Activate(super::PanelType::Log));

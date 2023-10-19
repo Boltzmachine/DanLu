@@ -1,31 +1,68 @@
-use crate::panels::{Panel, PanelType, TaskPanel, LogPanel, RunPanel, run_panel};
+use crate::panels::{Panel, PanelType, RunPanel, LogPanel, ChartPanel};
+use crate::run::Run;
 use ratatui::backend::Backend;
+use ratatui::{
+    layout::{Constraint, Direction, Rect, Layout},
+    style::{Color, Modifier, Style},
+    text::{Span, Line},
+    widgets::{Block, Borders, Tabs},
+    Frame, Terminal};
+use sqlite::Connection;
 
-pub struct App {
+pub struct App<'a> {
     pub active_panel: PanelType,
-    pub task_panel: TaskPanel,
-    pub log_panel: LogPanel,
     pub run_panel: RunPanel,
+    pub log_panel: LogPanel,
+    pub chart_panel: ChartPanel,
+    pub tabs: Tabs<'a>,
+    pub connection: Connection,
 }
 
-impl App {
+impl<'a> App<'a> {
     pub fn new() -> Self {
-        let task_panel = TaskPanel::new();
         let log_panel = LogPanel::new("");
         let run_panel = RunPanel::default();
+        let chart_panel = ChartPanel::new();
+        let tabs = Tabs::new(vec!["Home", "Chart"])
+            .block(Block::default().title("Tabs").borders(Borders::ALL))
+            .select(0)
+            .style(Style::default().fg(Color::White))
+            .highlight_style(Style::default().fg(Color::Yellow));
+
+        let connection = sqlite::open("workspace.db").unwrap();
+
+        
+        let create_runs_table = "CREATE TABLE IF NOT EXISTS Runs (
+                run_id INTEGER PRIMARY KEY,
+                run_name TEXT NOT NULL,
+                start_time TEXT NOT NULL,
+                end_time TEXT NOT NULL
+            );";
+        connection.execute(create_runs_table).unwrap();
+
         App {
-            active_panel: PanelType::Task,
-            task_panel,
-            log_panel,
+            active_panel: PanelType::Run,
             run_panel,
+            log_panel,
+            chart_panel,
+            tabs,
+            connection,
         }
+    }
+
+    pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
+        let tabs = Tabs::new(vec!["Home", "Chart"])
+            .block(Block::default().title("Tabs").borders(Borders::ALL))
+            .select(1)
+            .style(Style::default().fg(Color::White))
+            .highlight_style(Style::default().fg(Color::Yellow));
+        f.render_widget(tabs, area);
     }
 
     pub fn get_active_panel<B: Backend>(&mut self) -> &mut dyn Panel<B> {
         match self.active_panel {
-            PanelType::Task => &mut self.task_panel,
-            PanelType::Log => &mut self.log_panel,
             PanelType::Run => &mut self.run_panel,
+            PanelType::Log => &mut self.log_panel,
         }
     }
 

@@ -41,7 +41,7 @@ impl<B: Backend> Panel<B> for LogPanel {
 
     fn handle_input(&mut self, key: KeyEvent) -> Option<KeyInputRespond> {
         match key.code {
-            KeyCode::Left => { return Some(KeyInputRespond::Activate(PanelType::Task)); }
+            KeyCode::Left => { return Some(KeyInputRespond::Activate(PanelType::Run)); }
             KeyCode::Down => { self.scroll += 1; }
             KeyCode::Up => { 
                 if self.scroll > 0 {

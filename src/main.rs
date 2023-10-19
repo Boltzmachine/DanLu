@@ -17,9 +17,11 @@ use ratatui::{
 };
 
 mod utils;
-mod jobs;
+mod run;
 mod app;
 mod panels;
+mod logger;
+
 use utils::KeyInputRespond;
 use app::App;
 use panels::PanelType;
@@ -94,12 +96,19 @@ fn run_app<B: Backend>(
 fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     // Create two chunks with equal horizontal screen space
     let chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Length(3), Constraint::Min(0)].as_ref())
         .split(f.size());
-    let selected_task = app.task_panel.tasks.state.selected().unwrap();
-    app.log_panel.log = Rc::clone(&app.task_panel.tasks.items[selected_task].log);
-    app.task_panel.draw(f, chunks[0], app.active_panel == PanelType::Task);
-    app.log_panel.draw(f, chunks[1], app.active_panel == PanelType::Log);
-    app.run_panel.draw(f, f.size(), app.active_panel == PanelType::Run)
+
+    let tab_chunk = chunks[0];
+    let content_chunk = chunks[1];
+
+    app.draw(f, tab_chunk);
+    app.chart_panel.draw(f, content_chunk, app.active_panel == PanelType::Log);
+
+    // let selected_run = app.run_panel.runs.state.selected().unwrap();
+    // app.log_panel.log = Rc::clone(&app.run_panel.runs.items[selected_run].log);
+    // app.run_panel.draw(f, chunks[0], app.active_panel == PanelType::Run);
+    // app.log_panel.draw(f, chunks[1], app.active_panel == PanelType::Log);
+    // app.run_panel.draw(f, f.size(), app.active_panel == PanelType::Run)
 }
